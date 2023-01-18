@@ -19,6 +19,7 @@ func main() {
 
 	// create new instance of router
 	r := mux.NewRouter()
+	
 	routes.AuthRoutes(r)
 	routes.UserRoutes(r)
 

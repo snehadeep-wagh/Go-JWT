@@ -57,6 +57,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserById(w http.ResponseWriter, r *http.Request) {
+	fmt.Print("this is getuserbyid!")
 	params := mux.Vars(r)
 	userId := params["userId"]
 
@@ -89,7 +90,7 @@ func GetUserById(w http.ResponseWriter, r *http.Request) {
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {
-	fmt.Print("this is signup!")
+	// fmt.Print("this is signup!")
 	w.Header().Set("content-type", "application/json")
 	var user models.User
 	// unmarshal
@@ -107,7 +108,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	emailCount, err := userCollection.CountDocuments(ctx, bson.M{"email": user.Email})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Panic(err)
+		// log.Panic(err)
 		http.Error(w, "Error occured while checking the email.", http.StatusInternalServerError)
 		return
 	}
@@ -119,7 +120,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	phoneCount, err := userCollection.CountDocuments(ctx, bson.M{"phone": user.Phone})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Panic(err)
+		// log.Panic(err)
 		http.Error(w, "Error occured while checking the phone number.", http.StatusInternalServerError)
 		return
 	}
@@ -149,6 +150,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(insertCount)
+	json.NewEncoder(w).Encode(user)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -170,11 +172,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	dbErr := userCollection.FindOne(ctx, bson.M{"email": *user.Email}).Decode(&dbUser)
 	if dbErr != nil {
+		// fmt.Print("Error: " + dbErr.Error())
 		http.Error(w, "Email or password is incorrect!", http.StatusInternalServerError)
 		return
 	}
 
-	isValidPass, msg := VerifyPassword(*user.Password, *dbUser.Password)
+	isValidPass, msg := VerifyPassword(*dbUser.Password, *user.Password)
 
 	if isValidPass != true {
 		http.Error(w, "Error: "+msg, http.StatusBadRequest)
@@ -204,14 +207,14 @@ func VerifyPassword(userPassword string, providedPassword string) (bool, string)
 
 	if err != nil {
 		check = false
-		msg = fmt.Sprintf("Email or password is incorrect!")
+		msg = fmt.Sprintf(userPassword + " " + providedPassword + " " + "password is incorrect!")
 	}
 
 	return check, msg
 }
 
 func HashPassword(pass string) string {
-	encrPass, err := bcrypt.GenerateFromPassword([]byte(pass), 14)
+	encrPass, err := bcrypt.GenerateFromPassword([]byte(pass), 2)
 	if err != nil {
 		log.Panic(err)
 	}

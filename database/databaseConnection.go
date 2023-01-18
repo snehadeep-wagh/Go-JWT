@@ -5,22 +5,24 @@ import (
 	"log"
 	"os"
 	"time"
+
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DBinstance() *mongo.Client{
+func DBinstance() *mongo.Client {
 	// Load the env file
 	err := godotenv.Load(".env")
-	if(err != nil){
+	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
 	mongoUrl := os.Getenv("MONGODB_URL")
+	// fmt.Print("mongourl: " + mongoUrl)
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoUrl))
-	if(err != nil){
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -28,7 +30,7 @@ func DBinstance() *mongo.Client{
 	defer cancel()
 
 	err = client.Connect(ctx)
-	if(err != nil){
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -37,7 +39,7 @@ func DBinstance() *mongo.Client{
 
 var Client *mongo.Client = DBinstance()
 
-func OpenCollection(Client *mongo.Client, CollectionName string) *mongo.Collection{
-	collection :=Client.Database("cluster0").Collection(CollectionName)
+func OpenCollection(Client *mongo.Client, CollectionName string) *mongo.Collection {
+	collection := Client.Database("go-jwt").Collection(CollectionName)
 	return collection
 }

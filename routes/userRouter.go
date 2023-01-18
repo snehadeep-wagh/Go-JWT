@@ -1,13 +1,15 @@
 package routes
 
-import(
+import (
 	"github.com/gorilla/mux"
 	controllers "github.com/snehadeep-wagh/go-backend/controllers"
 	"github.com/snehadeep-wagh/go-backend/middleware"
 )
 
-func UserRoutes(r *mux.Router){
-	r.Use(middleware.Authenticate)
-	r.HandleFunc("/users", controllers.GetUser).Methods("GET")
-	r.HandleFunc("/users/{userId}", controllers.GetUserById).Methods("GET")
+func UserRoutes(r *mux.Router) {
+	// r.Use(middleware.Authenticate)
+	userSubRoutes := r.Methods("GET").Subrouter()
+	userSubRoutes.Use(middleware.Authenticate)
+	userSubRoutes.HandleFunc("/users", controllers.GetUser)
+	userSubRoutes.HandleFunc("/users/{userId}", controllers.GetUserById)
 }

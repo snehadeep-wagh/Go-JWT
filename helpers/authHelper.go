@@ -3,13 +3,13 @@ package helpers
 import (
 	"errors"
 	"net/http"
+
 	"github.com/gorilla/mux"
 )
 
 func CheckUserType(r *http.Request, role string) (err error) {
 	err = nil
-	params := mux.Vars(r)
-	user_type := params["user_type"]
+	user_type := r.Header.Get("user_type")
 
 	if user_type != role {
 		err = errors.New("Unauthorized access to the data")

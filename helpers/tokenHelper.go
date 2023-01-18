@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -46,10 +47,17 @@ func CreateAllTokens(email string, fName string, lName string, usrType string, u
 	}
 
 	signedToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claim).SignedString([]byte(secrete_key))
-	signedRefreshToken, err = jwt.NewWithClaims(jwt.SigningMethodES256, refreshClaim).SignedString([]byte(secrete_key))
+	if err != nil {
+		fmt.Printf("SignedToken Error: %v", err.Error())
+		// log.Panic(err)
+		return
+	}
+
+	signedRefreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaim).SignedString([]byte(secrete_key))
 
 	if err != nil {
-		log.Panic(err)
+		fmt.Printf("SignedRefreshToken Error: %v", err.Error())
+		// log.Panic(err)
 		return
 	}
 
@@ -86,7 +94,7 @@ func UpdateAllTokens(token string, refrehToken string, userId string) {
 	return
 }
 
-func ValidateToken(signedToken string) (claim *SignedDetails, msg string) {
+func ValidateToken(r *http.Request, signedToken string) (claim *SignedDetails, msg string) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&SignedDetails{},
@@ -109,6 +117,8 @@ func ValidateToken(signedToken string) (claim *SignedDetails, msg string) {
 		msg = err.Error()
 		return
 	}
+
+	r.Header.Set("user_type", claim.UserType)
 
 	return claim, msg
 }
